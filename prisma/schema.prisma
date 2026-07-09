@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  customer
+  technician
+  admin
+}
+
+enum UserStatus {
+  active
+  banned
+}
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  DECLINED
+  PAID
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+}
+
+enum PaymentProvider {
+  stripe
+  sslcommerz
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  password           String
+  phone              String?
+  role               Role
+  status             UserStatus          @default(active)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  technicianProfile  TechnicianProfile?
+  bookingsAsCustomer Booking[]           @relation("CustomerBookings")
+  payments           Payment[]
+  reviews            Review[]
+}
+
+model TechnicianProfile {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id])
+  skills       String[]
+  experience   Int?
+  pricing      Float?
+  bio          String?
+  availability Json?
+  rating       Float     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  services     Service[]
+  bookings     Booking[] @relation("TechnicianBookings")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+
+  services    Service[]
+}
+
+model Service {
+  id            String            @id @default(uuid())
+  technicianId  String
+  technician    TechnicianProfile @relation(fields: [technicianId], references: [id])
+  categoryId    String
+  category      Category          @relation(fields: [categoryId], references: [id])
+  title         String
+  description   String?
+  price         Float
+  location      String?
+  createdAt     DateTime          @default(now())
+
+  bookings      Booking[]
+}
+
+model Booking {
+  id           String            @id @default(uuid())
+  customerId   String
+  customer     User              @relation("CustomerBookings", fields: [customerId], references: [id])
+  technicianId String
+  technician   TechnicianProfile @relation("TechnicianBookings", fields: [technicianId], references: [id])
+  serviceId    String
+  service      Service           @relation(fields: [serviceId], references: [id])
+  timeSlot     DateTime
+  address      String?
+  notes        String?
+  amount       Float
+  status       BookingStatus     @default(REQUESTED)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  payment      Payment?
+  review       Review?
+}
+
+model Payment {
+  id            String          @id @default(uuid())
+  bookingId     String          @unique
+  booking       Booking         @relation(fields: [bookingId], references: [id])
+  customerId    String
+  customer      User            @relation(fields: [customerId], references: [id])
+  transactionId String          @unique
+  amount        Float
+  method        String
+  provider      PaymentProvider
+  status        PaymentStatus   @default(pending)
+  paidAt        DateTime?
+  createdAt     DateTime        @default(now())
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  bookingId    String   @unique
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+  customerId   String
+  customer     User     @relation(fields: [customerId], references: [id])
+  technicianId String
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now())
+}
