@@ -15,3 +15,12 @@ export interface ServiceDto {
   categoryId: string;
   technicianId: string;
 }
+
+// Data the technician sends when creating a new service
+export interface CreateServiceDto {
+  categoryId: string;
+  title: string;
+  description?: string;
+  price: number;
+  location?: string;
+}
