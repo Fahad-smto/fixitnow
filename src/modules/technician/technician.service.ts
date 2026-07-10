@@ -9,10 +9,10 @@ export const getProfileByUserId = async (userId: string) => {
 
 export const findAllTechnicians = async (filters: TechnicianFilterQuery) => {
   return prisma.technicianProfile.findMany({
-    where: {
-      rating: filters.rating ? { gte: Number(filters.rating) } : undefined,
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      services: true,
     },
-    include: { user: { select: { id: true, name: true, email: true } }, services: true },
   });
 };
 

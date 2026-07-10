@@ -19,6 +19,7 @@ export const registerUser = async (dto: RegisterDto) => {
       password: hashedPassword,
       role: dto.role,
       phone: dto.phone,
+     
     },
   });
 
