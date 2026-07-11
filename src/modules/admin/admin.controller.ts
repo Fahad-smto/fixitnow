@@ -4,7 +4,12 @@ import { UpdateUserStatusDto, CreateCategoryDto } from './admin.interface';
 
 // GET /api/admin/users
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
- 
+  try {
+    const users = await adminService.findAllUsers();
+    res.status(200).json({ success: true, data: users });
+  } catch (err) {
+    next(err);
+  }
 };
 
 // PATCH /api/admin/users/:id
