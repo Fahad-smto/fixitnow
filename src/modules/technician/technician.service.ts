@@ -7,14 +7,17 @@ export const getProfileByUserId = async (userId: string) => {
   return prisma.technicianProfile.findUnique({ where: { userId } });
 };
 
+
+
 export const findAllTechnicians = async (filters: TechnicianFilterQuery) => {
   return prisma.technicianProfile.findMany({
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      services: true,
+    where: {
+      rating: filters.rating ? { gte: Number(filters.rating) } : undefined,
     },
+    include: { user: { select: { id: true, name: true, email: true } }, services: true },
   });
 };
+
 
 // Returns the technician profile, or null if not found
 export const findTechnicianById = async (id: string) => {
