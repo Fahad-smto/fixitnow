@@ -10,16 +10,6 @@ export const protect = (req: Request, res: Response, next: NextFunction): void =
     return;
   }
 
-  if (!process.env.JWT_SECRET) {
-    res.status(500).json({ success: false, message: 'Server error: JWT secret not configured' });
-    return;
-  }
-
-  if (!req.user) {
-    res.status(401).json({ success: false, message: 'Not authorized, no user found' });
-    return;
-  }
-  
 
   try {
     const token = authHeader.split(' ')[1];
