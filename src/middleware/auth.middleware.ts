@@ -10,6 +10,11 @@ export const protect = (req: Request, res: Response, next: NextFunction): void =
     return;
   }
 
+  if (!process.env.JWT_SECRET) {
+    res.status(500).json({ success: false, message: 'Server error: JWT secret not configured' });
+    return;
+  }
+
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
