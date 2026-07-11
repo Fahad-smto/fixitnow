@@ -17,7 +17,9 @@ export const protect = (req: Request, res: Response, next: NextFunction): void =
 
   if (!req.user) {
     res.status(401).json({ success: false, message: 'Not authorized, no user found' });
+    return;
   }
+  
 
   try {
     const token = authHeader.split(' ')[1];
