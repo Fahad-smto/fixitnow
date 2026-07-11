@@ -7,6 +7,6 @@ const router = Router();
 router.post('/create', protect, authorize('customer'), paymentController.createPayment);
 router.post('/confirm', paymentController.confirmPayment); // gateway webhook/callback, no auth
 router.get('/', protect, paymentController.getMyPayments);
-router.get('/:id', paymentController.getPaymentById);
+router.get('/:id', protect, paymentController.getPaymentById);
 
 export default router;
