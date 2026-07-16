@@ -6,7 +6,7 @@ import { CreatePaymentDto, ConfirmPaymentDto } from './payment.interface';
 export const createPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const dto: CreatePaymentDto = req.body;
-    const result = await paymentService.createPayment(req.user!.id, dto);
+    const result = await paymentService.createPayment(req.user!.id);
 
     if (!result) {
       res.status(400).json({ success: false, message: 'Booking not found or not yet ACCEPTED' });
@@ -18,6 +18,12 @@ export const createPayment = async (req: Request, res: Response, next: NextFunct
     next(err);
   }
 };
+
+
+
+
+
+
 
 // POST /api/payments/confirm (webhook/callback from Stripe or SSLCommerz)
 export const confirmPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

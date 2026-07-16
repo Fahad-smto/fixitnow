@@ -1,34 +1,55 @@
-import { randomUUID } from 'crypto';
 import prisma from '../../config/prisma';
-import { CreatePaymentDto, ConfirmPaymentDto } from './payment.interface';
+import {  ConfirmPaymentDto } from './payment.interface';
+import { stripe } from '../../lib/stripe';
 
-// TODO: replace this with a real Stripe/SSLCommerz SDK call
-const createGatewaySession = async (provider: string) => {
-  const transactionId = randomUUID();
-  return { transactionId, sessionUrl: `https://mock-${provider}-checkout.com/session/${transactionId}` };
-};
 
-// Returns { payment, sessionUrl }, or null if the booking isn't ready for payment
-export const createPayment = async (customerId: string, dto: CreatePaymentDto) => {
-  const booking = await prisma.booking.findUnique({ where: { id: dto.bookingId } });
-  if (!booking || booking.status !== 'ACCEPTED') return null;
 
-  const session = await createGatewaySession(dto.provider);
+export const createPayment = async (userId: string) => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
 
-  const payment = await prisma.payment.create({
-    data: {
-      bookingId: dto.bookingId,
-      customerId,
-      amount: booking.amount,
-      method: dto.provider,
-      provider: dto.provider,
-      status: 'pending',
-      transactionId: session.transactionId,
-    },
+    let stripeCustomerId = user.stripeCustomerId;
+
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.name,
+        metadata: { userId: user.id },
+      });
+
+      stripeCustomerId = customer.id;
+
+       
+      await tx.user.update({
+        where: { id: userId },
+        data: { stripeCustomerId },
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [{ price: process.env.STRIPE_PRODUCT_PRICE_ID!, quantity: 1 }],
+      mode: 'payment',
+      customer: stripeCustomerId,
+      payment_method_types: ['card'],
+      success_url: `${process.env.FRONTEND_URL}/payment?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment?success=false`,
+      metadata: { userId: user.id },
+    });
+
+    return session.url;
   });
 
-  return { payment, sessionUrl: session.sessionUrl };
+  return { paymentUrl: transactionResult };
 };
+
+
+
+
+
+
+
 
 // Returns the updated payment, or null if the transaction doesn't exist
 export const confirmPayment = async (dto: ConfirmPaymentDto) => {

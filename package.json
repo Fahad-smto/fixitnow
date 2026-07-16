@@ -15,7 +15,8 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "stripe": "^22.3.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
