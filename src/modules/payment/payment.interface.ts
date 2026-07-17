@@ -3,9 +3,8 @@ export type PaymentStatus = 'pending' | 'completed' | 'failed';
 
 export interface CreatePaymentDto {
   bookingId: string;
-  provider: PaymentProvider;
 }
-
+ 
 export interface ConfirmPaymentDto {
   transactionId: string;
   status: PaymentStatus;
