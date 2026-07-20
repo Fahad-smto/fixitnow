@@ -42,7 +42,8 @@ export const getMyPayments = async (req: Request, res: Response, next: NextFunct
 export const confirmPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { transactionId, status } = req.body;
-
+    console.log(req.body);
+      console.log('confirmPayment called with:', { transactionId, status });
     if (!transactionId || !status) {
       res.status(400).json({ success: false, message: 'transactionId and status are required' });
       return;

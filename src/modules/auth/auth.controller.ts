@@ -25,6 +25,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   try {
     const result = await authService.loginUser(req.body);
 
+    console.log('Login result:', result); // Debugging line to check the result
+
     if (!result) {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
       return;
